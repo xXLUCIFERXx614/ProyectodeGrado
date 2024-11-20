@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Estudiante</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/General.css">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto max-w-lg py-8">
+        <!-- Logo y Título -->
+        <div class="flex flex-col items-center mb-8">
+            <img src="/img/Logo.png" alt="Logo UTS" class="h-24 mb-4">
+            <h2 class="text-3xl font-bold text-blue-700">Registro de Estudiante</h2>
+            <p class="text-gray-600 mt-2">Regístrate directamente en un curso</p>
+        </div>
+
+        <!-- Formulario de Registro -->
+      <form th:action="@{/students/registro/save}" method="post" th:object="${student}" class="bg-white p-8 rounded-lg shadow-lg space-y-6">
+
+    <!-- Número de Identificación -->
+    <div>
+        <label for="identificationNumber" class="block text-sm font-semibold text-black-600">Número de Identificación:</label>
+       <input type="text" id="identificationNumber" name="identificationNumber" th:value="${student.identificationNumber}" 
+       class="w-full p-3 border border-gray-300 rounded-lg" oninput="fetchStudentData(this.value)" required>
+
+    </div>
+
+    <!-- Nombre -->
+    <div>
+        <label for="firstName" class="block text-sm font-semibold text-black-600">Nombre:</label>
+        <input type="text" id="firstName" name="firstName" th:value="${student.firstName}" 
+               class="w-full p-3 border border-gray-300 rounded-lg" required>
+    </div>
+
+    <!-- Apellido -->
+    <div>
+        <label for="lastName" class="block text-sm font-semibold text-black-600">Apellido:</label>
+        <input type="text" id="lastName" name="lastName" th:value="${student.lastName}" 
+               class="w-full p-3 border border-gray-300 rounded-lg" required>
+    </div>
+
+    <!-- Correo Electrónico -->
+    <div>
+        <label for="email" class="block text-sm font-semibold text-black-600">Correo Electrónico:</label>
+        <input type="email" id="email" name="email" th:value="${student.email}" 
+               class="w-full p-3 border border-gray-300 rounded-lg" required>
+    </div>
+		
+			<div>
+			    <label for="courseId" class="block text-sm font-semibold text-black-600">Seleccione el Curso:</label>
+			    <select id="courseId" name="courseEnrollments[0].courseId" th:field="*{courseEnrollments[0].courseId}" 
+			            class="w-full p-3 border border-gray-300 rounded-lg" onchange="updateEnglishLevel()" required>
+			        <option value="" disabled selected>Seleccione un curso...</option>
+			        <option th:each="course : ${courses}" th:value="${course.id}" 
+			                th:data-english-level="${course.englishLevel}" 
+			                th:text="${course.courseName}"></option>
+			    </select>
+			</div>
+			
+					            <!-- Nivel de Inglés -->
+			<div>
+			    <label for="englishLevel" class="block text-sm font-semibold text-black-600">Nivel de Inglés:</label>
+			    <input type="text" id="englishLevel" name="courseEnrollments[0].englishLevel" th:field="*{courseEnrollments[0].englishLevel}" 
+			           class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700" readonly>
+			</div>
+
+
+            <!-- Botones -->
+            <div class="flex justify-center space-x-4">
+			    <a href="/index" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg">Salir</a>
+			    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 transform hover:scale-105">
+			        Registrarse
+			    </button>
+			</div>
+
+        </form>
+<!-- Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <h2 id="modalMessage" 
+            class="text-xl font-bold mb-4" 
+            th:class="${isError} ? 'text-red-600' : 'text-green-600'" 
+            th:text="${message}">¡Mensaje!</h2>
+      
+        <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+            Listo
+        </button>
+    </div>
+</div>
+
+
+    </div>
+<script th:inline="javascript">
+function updateEnglishLevel() {
+    const courseSelect = document.getElementById('courseId');
+    const englishLevelInput = document.getElementById('englishLevel');
+
+    // Obtener los datos del curso seleccionado
+    const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+    const englishLevel = selectedOption.getAttribute('data-english-level') || '';
+    const courseName = selectedOption.text || '';
+
+    // Actualizar los campos del formulario
+    englishLevelInput.value = englishLevel;
+
+    // Si tienes un campo oculto para el nombre del curso, también lo puedes actualizar
+    const courseNameInput = document.getElementById('courseName'); // Campo oculto opcional
+    if (courseNameInput) {
+        courseNameInput.value = courseName;
+    }
+}
+
+</script>
+
+ <script th:inline="javascript">
+        // Mostrar el modal si hay un mensaje de éxito
+      document.addEventListener('DOMContentLoaded', function () {
+    const message = /*[[${message}]]*/ '';
+    const isError = /*[[${isError}]]*/ false;
+
+    if (message) {
+        const modal = document.getElementById('successModal');
+        modal.classList.remove('hidden');
+
+        // Cambiar el color del modal según el estado
+        const title = modal.querySelector('h2');
+        title.classList.toggle('text-green-600', !isError);
+        title.classList.toggle('text-red-600', isError);
+    }
+});
+
+function closeModal() {
+    const modal = document.getElementById('successModal');
+    modal.classList.add('hidden');
+}
+
+
+    </script>
+   <script th:inline="javascript">
+   function fetchStudentData(identificationNumber) {
+	    if (!identificationNumber) {
+	        clearStudentFields();
+	        return;
+	    }
+
+	    fetch(`/students/registro/search?identificationNumber=${identificationNumber}`)
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error('No se encontró el estudiante.');
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            if (data) {
+	                // Actualizar campos del formulario
+	                document.getElementById('firstName').value = data.firstName || '';
+	                document.getElementById('lastName').value = data.lastName || '';
+	                document.getElementById('email').value = data.email || '';
+
+	                // Cargar último curso
+	                if (data.courseEnrollments.length > 0) {
+	                    const lastEnrollment = data.courseEnrollments[data.courseEnrollments.length - 1];
+	                    document.getElementById('courseId').value = lastEnrollment.courseId || '';
+	                    document.getElementById('englishLevel').value = lastEnrollment.englishLevel || '';
+	                }
+	            } else {
+	                clearStudentFields();
+	            }
+	        })
+	        .catch(error => {
+	            console.error('Error al buscar el estudiante:', error);
+	            clearStudentFields();
+	        });
+	}
+
+	function clearStudentFields() {
+	    document.getElementById('firstName').value = '';
+	    document.getElementById('lastName').value = '';
+	    document.getElementById('email').value = '';
+	    document.getElementById('courseId').value = '';
+	    document.getElementById('englishLevel').value = '';
+	}
+
+</script>
+
+</body>
+</html>

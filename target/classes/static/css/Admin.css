@@ -1,0 +1,168 @@
+/* General */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+/* Contenedor de tarjetas */
+.card-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+.card {
+    margin: 20px;
+    width: 300px;
+    height: 300px;
+    position: relative;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    background-color: #ffffff; /* Blanco suave de fondo */
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card .front-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card .front-content p {
+    font-size: 32px;
+    font-weight: 700;
+    color: rgb(0, 0, 0); /* Verde azulado para contraste */
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #90ee90 0% #00bfff 100%); /* De verde azulado a azul */
+    color: rgb(0, 0, 0);
+    padding: 20px;
+    line-height: 1.5;
+    border-radius: 10px;
+    pointer-events: none;
+    transform: translateY(100%);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+
+.card .content .heading {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.card:hover .content {
+    transform: translateY(0);
+    pointer-events: auto;
+    background: linear-gradient(135deg, #90ee90 0%, #b0e0e6 100%); /* Verde claro a azul claro en hover */
+}
+
+.card:hover .front-content {
+    transform: translateY(-30%);
+}
+
+.card .content p {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Botón */
+.btn {
+    display: inline-block;
+    background-color: rgb(0, 128, 255); /* Azul brillante */
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn:hover {
+    background-color: rgb(0, 128, 192); /* Verde azulado al hacer hover */
+    transform: translateY(-2px);
+}
+
+/* Botón Go Back */
+.go-back-container {
+    display: flex;
+    justify-content: flex-end; /* Cambia a flex-start para alinearlo a la izquierda */
+    width: 100%;
+    margin-top: -60px; /* Ajusta el valor para subirlo más o menos */
+    margin-left: -60px; /* Ajusta el valor para moverlo a la izquierda */
+}
+
+.go-back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #0080ff;
+    color: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.go-back-button svg {
+    margin-right: 8px;
+    fill: currentColor;
+    transition: transform 0.3s ease;
+}
+
+.go-back-button:hover {
+    background-color: #0267ff;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.go-back-button:hover svg {
+    transform: translateX(-4px);
+}
+
+.go-back-button:active {
+    transform: scale(0.98);
+}
+
+.go-back-button p {
+    margin: 0;
+    font-size: 16px;
+    color: #fff;
+}

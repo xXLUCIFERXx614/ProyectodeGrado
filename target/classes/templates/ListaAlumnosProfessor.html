@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Estudiantes - Curso</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/General.css">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto py-8">
+        
+        <!-- Contenedor del Logo y Botón de Go Back -->
+        <div class="flex items-center mb-6 h-24">
+            <div class="mr-auto">
+                <img src="/img/Logo.png" alt="Logo" class="h-24 w-auto">
+            </div>
+            <div class="go-back-container">
+                <a th:href="@{/logout}" class="go-back-button flex items-center">
+                    <div class="button-hover mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
+                            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
+                            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="#000"></path>
+                        </svg>
+                    </div>
+                    <p class="text-blue-700 font-semibold">Go Back</p>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Información del Curso -->
+        <h2 class="text-3xl font-semibold text-blue-700 mb-4">Detalles del Curso</h2>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-green-400">
+            <p class="text-blue-900"><strong>Nombre del Curso:</strong> <span th:text="${course.courseName}"></span></p>
+            <p class="text-blue-900"><strong>Nivel de Inglés:</strong> <span th:text="${course.englishLevel}"></span></p>
+            <p class="text-blue-900"><strong>Fecha de Inicio:</strong> <span th:text="${course.startDate}"></span></p>
+            <p class="text-blue-900"><strong>Fecha de Fin:</strong> <span th:text="${course.endDate}"></span></p>
+        </div>
+
+        <!-- Búsqueda por Cédula -->
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Buscar por Cédula" class="px-4 py-2 border rounded-lg w-full" oninput="searchByCedula()">
+        </div>
+
+        <!-- Tabla de Estudiantes Inscritos con Paginación -->
+        <h2 class="text-xl font-semibold text-blue-700 mb-4">Estudiantes Inscritos</h2>
+        <div class="overflow-x-auto bg-white rounded-lg shadow-md border-t-4 border-blue-500">
+            <table id="studentsTable" class="table-auto w-full text-lg">
+                <thead>
+                    <tr class="bg-green-100 text-black uppercase leading-normal">
+                        <th class="py-4 px-6 text-left">Nombre del Estudiante</th>
+                        <th class="py-4 px-6 text-left">Identificación</th>
+                        <th class="py-4 px-6 text-left">Correo Electrónico</th>
+                        <th class="py-4 px-6 text-left">Estado</th>
+                        <th class="py-4 px-6 text-left">Nota Final</th>
+                        
+                        
+                    </tr>
+                </thead>
+				<tbody id="studentsTableBody" class="text-black font-medium">
+				    <tr th:each="enrollment : ${students}" class="hover:bg-green-50">
+				        <td class="py-4 px-6 text-left" th:text="${enrollment.firstName} + ' ' + ${enrollment.lastName}"></td>
+				        <td class="py-4 px-6 text-left identification-number" th:text="${enrollment.identificationNumber}"></td>
+				        <td class="py-4 px-6 text-left" th:text="${enrollment.email}"></td>				      
+				        <td class="py-4 px-6 text-left" th:text="${enrollment.courseEnrollments[0]?.status}"></td>
+				          <td class="py-4 px-6 text-left">
+				            <form th:action="@{/professors/course/{courseId}/updateFinalGrade(courseId=${enrollment.courseEnrollments[0]?.courseId})}" method="post">
+				                <input type="hidden" name="studentId" th:value="${enrollment.id}">
+				                <input type="text" name="finalGrade" th:value="${enrollment.courseEnrollments[0]?.finalGrade}" class="border border-gray-300 rounded px-2 py-1" placeholder="Nueva Nota">
+				                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Guardar</button>
+				            </form>
+				        </td>
+				    </tr>
+				</tbody>
+            </table>
+        </div>
+
+        <!-- Controles de Paginación -->
+        <div id="paginationControls" class="flex justify-center mt-4">
+            <!-- JavaScript insertará los botones de paginación aquí -->
+        </div>
+    </div>
+
+    <!-- JavaScript para búsqueda y paginación -->
+    <script>
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        const table = document.getElementById("studentsTableBody");
+        const totalRows = table.rows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        function displayTablePage(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            for (let i = 0; i < totalRows; i++) {
+                table.rows[i].style.display = i >= start && i < end ? "" : "none";
+            }
+            updatePaginationControls();
+        }
+
+        function updatePaginationControls() {
+            const paginationControls = document.getElementById("paginationControls");
+            paginationControls.innerHTML = "";
+
+            // Botones de navegación de páginas
+            const firstButton = createPaginationButton("«", () => displayTablePage(1));
+            paginationControls.appendChild(firstButton);
+
+            const prevButton = createPaginationButton("‹", () => displayTablePage(Math.max(currentPage - 1, 1)));
+            paginationControls.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = createPaginationButton(i, () => displayTablePage(i), i === currentPage);
+                paginationControls.appendChild(pageButton);
+            }
+
+            const nextButton = createPaginationButton("›", () => displayTablePage(Math.min(currentPage + 1, totalPages)));
+            paginationControls.appendChild(nextButton);
+
+            const lastButton = createPaginationButton("»", () => displayTablePage(totalPages));
+            paginationControls.appendChild(lastButton);
+        }
+
+        function createPaginationButton(text, onClick, isActive = false) {
+            const button = document.createElement("button");
+            button.className = `mx-1 px-3 py-1 rounded-lg ${isActive ? "bg-blue-700 text-white" : "bg-blue-100 text-blue-700 hover:bg-blue-300"}`;
+            button.textContent = text;
+            button.onclick = onClick;
+            return button;
+        }
+
+    
+
+        displayTablePage(currentPage);
+        
+        
+        function searchByCedula() {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+
+            // Mostrar u ocultar filas según el término de búsqueda
+            for (let i = 0; i < table.rows.length; i++) {
+                const cedula = table.rows[i].querySelector(".identification-number").textContent.toLowerCase();
+                table.rows[i].style.display = cedula.includes(searchTerm) ? "" : "none";
+            }
+
+            // Recalcular el total de páginas en función de las filas visibles
+            const visibleRows = Array.from(table.rows).filter(row => row.style.display !== "none").length;
+            totalPages = Math.ceil(visibleRows / rowsPerPage);
+
+            // Mostrar la primera página de los resultados filtrados y actualizar los controles de paginación
+            displayTablePage(1);
+        }
+
+    </script>
+</body>
+</html>

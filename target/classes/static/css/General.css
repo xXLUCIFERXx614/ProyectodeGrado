@@ -1,0 +1,70 @@
+/* Colores personalizados para el tema */
+.bg-blue-50 {
+    background-color: #ebf8ff;
+}
+
+.text-blue-700 {
+    color: #2b6cb0;
+}
+
+.text-blue-900 {
+    color: #1a365d;
+}
+
+.bg-green-100 {
+    background-color: #c6f6d5;
+}
+
+.bg-green-50 {
+    background-color: #f0fff4;
+}
+
+.bg-blue-600 {
+    background-color: #3182ce;
+}
+
+.bg-blue-700 {
+    background-color: #2c5282;
+}
+
+.border-blue-500 {
+    border-color: #4299e1;
+}
+
+.border-green-400 {
+    border-color: #68d391;
+}
+
+a.bg-blue-600:hover {
+    background-color: #2c5282;
+}
+.go-back-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.go-back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #68d391; /* Verde */
+    color: #ffffff;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.go-back-button:hover {
+    background-color: #48bb78;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.go-back-button p {
+    margin: 0;
+    font-size: 16px;
+    color: #ffffff;
+}
