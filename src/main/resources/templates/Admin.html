@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <title>Admin</title>
+  <link rel="stylesheet" href="/css/Admin.css">
+   <link rel="stylesheet" href="/css/General.css">
+ 
+</head>
+
+<body class="bg-blue-50">
+  <div class="container">
+    <!-- Botón de Go Back con enlace Thymeleaf a /logout -->
+ <div class="go-back-container">
+    <a th:href="@{/logout}" class="go-back-button">
+        <div class="button-hover">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="#000"></path>
+            </svg>
+        </div>
+        <p>Go Back</p>
+    </a>
+</div>
+
+
+    <!-- Contenedor de tarjetas -->
+    <div class="card-container">
+      <div class="card">
+        <div class="front-content">
+          <p>Alumnos</p>
+        </div>
+        <div class="content">
+          <p class="heading">Alumnos</p>
+          <p>Lista completa de Alumnos.</p>
+          <a th:href="@{/students/listar}" class="btn">Ver más</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="front-content">
+          <p>Cursos</p>
+        </div>
+        <div class="content">
+          <p class="heading">Cursos</p>
+          <p>Lista completa de cursos.</p>
+          <a th:href="@{/course/listar}" class="btn">Ver más</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="front-content">
+          <p>Profesores</p>
+        </div>
+        <div class="content">
+          <p class="heading">Profesores</p>
+          <p>Lista completa de profesores.</p>
+          <a th:href="@{/professors/listar}" class="btn">Ver más</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="front-content">
+          <p>Coordinadores</p>
+        </div>
+        <div class="content">
+          <p class="heading">Coordinadores</p>
+          <p>Lista completa de Coordinador.</p>
+          <a th:href="@{/admins/listar}" class="btn">Ver más</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

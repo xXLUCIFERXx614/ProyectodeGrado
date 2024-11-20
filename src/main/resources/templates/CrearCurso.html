@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.id != null ? 'Editar Curso' : 'Crear Curso'}">Formulario de Curso</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/img/icon.png">
+    <link rel="stylesheet" href="/css/General.css">
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto py-8">
+        <!-- Contenedor del Logo y Botón de Go Back -->
+        <div class="flex items-center mb-6 h-24">
+            <!-- Logo -->
+            <div class="mr-auto">
+                <img src="/img/Logo.png" alt="Logo" class="h-24 w-auto">
+            </div>
+            <!-- Botón de Go Back con enlace Thymeleaf a /course/Link -->
+            <div class="go-back-container">
+                <a th:href="@{/course/Link}" class="go-back-button flex items-center">
+                    <div class="button-hover mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
+                            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
+                            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="#000"></path>
+                        </svg>
+                    </div>
+                    <p class="text-blue-700 font-semibold">Go Back</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="container mx-auto max-w-lg p-8 bg-white rounded-lg shadow-xl">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-8" th:text="${course.id != null ? 'Editar Curso' : 'Crear Curso'}">Formulario de Curso</h2>
+            
+            <form th:action="@{${course.id != null} ? '/course/edit/' + ${course.id} : '/course/new'}" method="post" class="space-y-6">
+                <!-- Campo Nombre del Curso -->
+                <div>
+                    <label for="courseName" class="block text-gray-700 font-semibold mb-1">Nombre del Curso:</label>
+                    <input type="text" id="courseName" name="courseName" th:value="${course.courseName}" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                </div>
+
+                <!-- Selector de Nivel del Curso -->
+                <div>
+                    <label for="courseLevel" class="block text-gray-700 font-semibold mb-1">Nivel del Curso:</label>
+                    <select id="courseLevel" name="englishLevel" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                        <option value="">Seleccione un nivel</option>
+                        <option value="Nivel 1" th:selected="${course.englishLevel == 'Nivel 1'}">Nivel 1</option>
+                        <option value="Nivel 2" th:selected="${course.englishLevel == 'Nivel 2'}">Nivel 2</option>
+                        <option value="Nivel 3" th:selected="${course.englishLevel == 'Nivel 3'}">Nivel 3</option>
+                        <option value="Nivel 4" th:selected="${course.englishLevel == 'Nivel 4'}">Nivel 4</option>
+                    </select>
+                </div>
+
+                <!-- Campo Fecha de Inicio -->
+                <div>
+                    <label for="startDate" class="block text-gray-700 font-semibold mb-1">Fecha de Inicio:</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${course.startDate}" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                </div>
+
+                <!-- Campo Fecha de Fin -->
+                <div>
+                    <label for="endDate" class="block text-gray-700 font-semibold mb-1">Fecha de Fin:</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${course.endDate}" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                </div>
+
+                <!-- Selector de Profesor -->
+                <div>
+                    <label for="professorSelect" class="block text-gray-700 font-semibold mb-1">Profesor:</label>
+                    <select name="professorId" id="professorSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                        <option value="">Profesor no asignado</option>
+                        <option th:each="professor : ${professors}"
+                                th:value="${professor.id}"
+                                th:text="${professor.firstName + ' ' + professor.lastName}"
+                                th:selected="${course.professorId == professor.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Botón de Envío -->
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105" th:text="${course.id != null ? 'Actualizar Curso' : 'Crear Curso'}">Guardar</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles del Alumno</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+     <link rel="stylesheet" href="/css/General.css">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+</head>
+<body class="bg-blue-50">
+<div class="container mx-auto py-8">
+
+    <!-- Contenedor del Logo y Botón de Go Back -->
+    <div class="flex items-center mb-6 h-24">
+        <div class="mr-auto">
+            <img src="/img/Logo.png" alt="Logo" class="h-24 w-auto">
+        </div>
+  <div class="go-back-container">
+                <a th:href="@{/students/listar}" class="go-back-button flex items-center">
+                    <div class="button-hover mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
+                            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
+                            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="#000"></path>
+                        </svg>
+                    </div>
+                    <p class="text-blue-700 font-semibold">Go Back</p>
+                </a>
+            </div>
+    </div>
+
+    <!-- Título de la Página -->
+    <h2 class="text-3xl font-semibold text-blue-700 mb-5 text-center">Detalles del Alumno</h2>
+
+    <!-- Información del Alumno -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-green-400">
+        <p class="text-blue-900"><strong>Nombre:</strong> <span th:text="${student.firstName + ' ' + student.lastName}"></span></p>
+        <p class="text-blue-900"><strong>Cédula:</strong> <span th:text="${student.identificationNumber}"></span></p>
+        <p class="text-blue-900"><strong>Correo:</strong> <span th:text="${student.email}"></span></p>
+    </div>
+
+    <!-- Información de Cursos Inscritos -->
+    <h3 class="text-xl font-semibold text-blue-700 mb-4">Cursos Inscritos</h3>
+
+    <!-- Tabla de Cursos -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow-md border-t-4 border-blue-500">
+        <table class="table-auto w-full text-lg">
+            <thead>
+                <tr class="bg-green-100 text-black uppercase leading-normal">
+                    <th class="py-4 px-6 text-left">#</th>
+                    <th class="py-4 px-6 text-left">Nombre del Curso</th>
+                    <th class="py-4 px-6 text-left">Nivel de Inglés</th>
+                    <th class="py-4 px-6 text-left">Estado</th>
+                    <th class="py-4 px-6 text-left">Nota Definitiva</th>
+                    <th class="py-4 px-6 text-left">Certificado</th>
+                    <th class="py-4 px-6 text-left">Detalles</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody" class="text-black font-medium">
+                <tr th:each="enrollment, iterStat : ${enrollments}" class="hover:bg-green-50">
+                    <td class="py-4 px-6" th:text="${iterStat.count}"></td>
+                    <td class="py-4 px-6" th:text="${enrollment.courseName}"></td>
+                    <td class="py-4 px-6" th:text="${enrollment.englishLevel}"></td>
+                    <td class="py-4 px-6" th:text="${enrollment.status}"></td>
+                    <td class="py-4 px-6" th:text="${enrollment.finalGrade}"></td>
+                    <td class="py-4 px-6">
+				    <!-- Botón de imprimir -->
+				    <a th:if="${enrollment.status == 'Aprobado'}" 
+				       th:href="@{/PDF/download(studentName=${student.firstName + ' ' + student.lastName}, program=${student.program}, id=${student.identificationNumber}, date=${enrollment.endDate})}" 
+				       class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Imprimir</a>
+				
+				    <!-- Texto informativo si no está aprobado -->
+				    <span th:if="${enrollment.status != 'Aprobado'}" 
+				          class="text-gray-500 italic">Certificado no disponible</span>
+				</td>
+
+                    <td class="py-4 px-6">
+                        <a th:href="@{/course/{courseId}(courseId=${enrollment.courseId})}" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Ver Más</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+            <!-- Mensaje si no hay cursos inscritos -->
+    <div th:if="${enrollments == null || enrollments.isEmpty()}" class="text-center text-gray-500 mt-5">
+        No hay cursos inscritos para este alumno.
+    </div>
+
+    </div>
+    
+
+
+        <div id="paginationControls" class="flex justify-center mt-4">
+            <!-- JavaScript insertará los botones de paginación aquí -->
+        </div>
+
+</div>
+
+<!-- JavaScript para la paginación -->
+<script>
+const rowsPerPage = 10;
+let currentPage = 1;
+const table = document.getElementById("studentsTableBody");
+const totalRows = table.rows.length;
+const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+function displayTablePage(page) {
+    currentPage = page;
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    for (let i = 0; i < totalRows; i++) {
+        table.rows[i].style.display = i >= start && i < end ? "" : "none";
+    }
+    updatePaginationControls();
+}
+
+function updatePaginationControls() {
+    const paginationControls = document.getElementById("paginationControls");
+    paginationControls.innerHTML = "";
+
+    // Botones de navegación de páginas
+    const firstButton = createPaginationButton("«", () => displayTablePage(1));
+    paginationControls.appendChild(firstButton);
+
+    const prevButton = createPaginationButton("‹", () => displayTablePage(Math.max(currentPage - 1, 1)));
+    paginationControls.appendChild(prevButton);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = createPaginationButton(i, () => displayTablePage(i), i === currentPage);
+        paginationControls.appendChild(pageButton);
+    }
+
+    const nextButton = createPaginationButton("›", () => displayTablePage(Math.min(currentPage + 1, totalPages)));
+    paginationControls.appendChild(nextButton);
+
+    const lastButton = createPaginationButton("»", () => displayTablePage(totalPages));
+    paginationControls.appendChild(lastButton);
+}
+
+function createPaginationButton(text, onClick, isActive = false) {
+    const button = document.createElement("button");
+    button.className = `mx-1 px-3 py-1 rounded-lg ${isActive ? "bg-blue-700 text-white" : "bg-blue-100 text-blue-700 hover:bg-blue-300"}`;
+    button.textContent = text;
+    button.onclick = onClick;
+    return button;
+}
+
+
+
+displayTablePage(currentPage);
+
+    // Inicializar la primera página
+    displayTablePage(1);
+</script>
+</body>
+</html>
