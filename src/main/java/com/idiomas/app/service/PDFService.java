@@ -29,7 +29,7 @@ public class PDFService {
 
         try {
             // Logo
-            Image logo = Image.getInstance("src/main/resources/static/img/Logo.png");
+            Image logo = Image.getInstance("/src/main/resources/static/img/Logo.png");
             logo.scaleToFit(80, 50); // Escalar logo
             PdfPCell logoCell = new PdfPCell(logo);
             logoCell.setBorder(Rectangle.NO_BORDER); // Sin bordes
@@ -167,7 +167,7 @@ public class PDFService {
 
         // Agregar imagen de la firma
         try {
-            Image signatureImage = Image.getInstance("src/main/resources/static/img/Logo.png"); // Cambiar por firma 
+            Image signatureImage = Image.getInstance("/src/main/resources/static/img/Logo.png"); // Cambiar por firma 
             signatureImage.scaleToFit(100, 50); // Tamaño de la firma
             signatureImage.setAlignment(Element.ALIGN_LEFT); // Alineación de la firma
             combinedCell.addElement(signatureImage); // Agregar firma
@@ -206,7 +206,7 @@ public class PDFService {
 
         // Agregar la imagen de la firma
         try {
-            Image signatureImage = Image.getInstance("src/main/resources/static/img/Logo.png"); // Cambiar por firma Coodrinador 
+            Image signatureImage = Image.getInstance("/src/main/resources/static/img/Logo.png"); // Cambiar por firma Coodrinador 
             signatureImage.scaleToFit(80, 40); // Ajustar tamaño de la firma
             signatureImage.setAlignment(Element.ALIGN_CENTER); // Centrar la imagen
             rightCell.addElement(signatureImage);
