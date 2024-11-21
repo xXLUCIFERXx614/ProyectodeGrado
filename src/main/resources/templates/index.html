@@ -42,7 +42,17 @@
                 <p>Inicia sesión para acceder a tu cuenta.</p>
                 <a th:href="@{/login}" class="title">Iniciar Sesión</a>
             </div>
+            
+                <!-- Contenedor 4: Ver Credenciales -->
+        <div class="card">
+            <p class="title heading">Ver Credenciales</p>
+            <p>Consulta las credenciales asignadas para cada rol.</p>
+            <a th:href="@{/admins/credenciales}" class="title bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600">
+                Ver Credenciales
+            </a>
         </div>
+        </div>
+      
   <script>
     // Define las fechas de inicio y fin del registro
     const registrationStartDate = new Date('2024-11-15'); // Fecha de inicio (YYYY-MM-DD)

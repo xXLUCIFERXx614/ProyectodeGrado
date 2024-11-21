@@ -10,7 +10,7 @@ import com.idiomas.app.repository.ProfessorRepository;
 import com.idiomas.app.repository.StudentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Controller
 @RequestMapping("/professors")
 public class ProfessorController {
 
@@ -149,9 +149,11 @@ public class ProfessorController {
 
     @GetMapping("/edit/{id}")
     public ModelAndView showEditProfessorForm(@PathVariable("id") String id) {
-        Optional<Professor> professor = professorRepository.findById(id);
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado"));
+
         ModelAndView modelAndView = new ModelAndView("CrearProfesor");
-        modelAndView.addObject("professor", professor.orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado")));
+        modelAndView.addObject("professor", professor);
         modelAndView.addObject("title", "Editar Profesor");
         modelAndView.addObject("actionUrl", "/professors/edit/" + id);
         modelAndView.addObject("buttonText", "Actualizar");
@@ -159,17 +161,24 @@ public class ProfessorController {
     }
 
     @PostMapping("/edit/{id}")
-    public ModelAndView editProfessor(@PathVariable("id") String id, @ModelAttribute("professor") Professor updatedProfessor) {
+    public String editProfessor(@PathVariable("id") String id, 
+                                @ModelAttribute("professor") Professor updatedProfessor, 
+                                RedirectAttributes redirectAttributes) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado"));
+
+        // Actualizar los campos del profesor
         professor.setFirstName(updatedProfessor.getFirstName());
         professor.setLastName(updatedProfessor.getLastName());
         professor.setEmail(updatedProfessor.getEmail());
+        professor.setIdentificationNumber(updatedProfessor.getIdentificationNumber());
         professorRepository.save(professor);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/professors/listar");
-        modelAndView.addObject("message", "Profesor actualizado exitosamente");
-        return modelAndView;
+        // Agregar un mensaje de éxito
+        redirectAttributes.addFlashAttribute("message", "Profesor actualizado exitosamente");
+
+        // Redirigir a la lista de profesores
+        return "redirect:/professors/listar";
     }
 
 

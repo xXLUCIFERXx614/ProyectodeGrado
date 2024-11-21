@@ -34,7 +34,17 @@
         <div class="flex justify-end mb-4">
             <a th:href="@{/admins/new}" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded">Crear Administrador</a>
         </div>
-        
+        <!-- Campo de búsqueda -->
+			<div class="relative mb-4">
+			    <input
+			        id="searchInput"
+			        placeholder="Buscar por cédula"
+			        type="text"
+			        class="px-4 py-2 border rounded-lg w-full"
+			        oninput="buscarPorCedula()"
+			    />
+			</div>
+			        
         <!-- Tabla para mostrar los administradores -->
         <div class="overflow-x-auto bg-white rounded-lg shadow-md border-t-4 border-blue-500">
             <table class="table-auto w-full text-lg">
@@ -90,5 +100,43 @@
             document.getElementById('confirmModal').classList.add('hidden');
         }
     </script>
+    
+    
+    <script>
+    function buscarPorCedula() {
+        const busqueda = document.getElementById('searchInput').value.trim().toLowerCase(); // Obtener el valor ingresado y convertirlo a minúsculas
+        const tableBody = document.querySelector('tbody');
+        const rows = tableBody.querySelectorAll('tr');
+        let found = false;
+
+        rows.forEach(row => {
+            const cedula = row.querySelector('td:nth-child(5)').textContent.trim().toLowerCase(); // Obtener la cédula de la quinta columna
+
+            if (cedula.includes(busqueda)) {
+                row.style.display = ''; // Mostrar la fila si coincide
+                found = true;
+            } else {
+                row.style.display = 'none'; // Ocultar la fila si no coincide
+            }
+        });
+
+        // Mostrar mensaje si no hay coincidencias
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        if (!found) {
+            if (!noResultsMessage) {
+                const message = document.createElement('p');
+                message.id = 'noResultsMessage';
+                message.textContent = 'No se encontraron resultados.';
+                message.className = 'text-center text-gray-500 mt-5';
+                tableBody.parentNode.appendChild(message);
+            }
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.remove();
+            }
+        }
+    }
+</script>
+    
 </body>
 </html>

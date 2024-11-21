@@ -103,7 +103,7 @@
                     <a id="confirmButton" href="#" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">Confirmar</a>
                 </div>
             </div>
-        </div>>
+        </div>
 
     <!-- Script para abrir y cerrar el modal -->
     <script>
@@ -138,5 +138,32 @@
             });
         }
     </script>
+    
+    
+<script>
+    function buscarCursos() {
+        const busqueda = document.getElementById('searchInput').value.trim().toLowerCase(); // Quitar espacios y convertir a minúsculas
+        const tableBody = document.getElementById('tableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        let found = false;
+
+        rows.forEach(row => {
+            const courseName = row.querySelector('td:nth-child(2)').textContent.trim().toLowerCase(); // Nombre del curso (segunda columna)
+
+            // Comparar ignorando espacios
+            if (courseName.replace(/\s+/g, '').includes(busqueda.replace(/\s+/g, ''))) {
+                row.style.display = ''; // Mostrar fila si coincide
+                found = true;
+            } else {
+                row.style.display = 'none'; // Ocultar fila si no coincide
+            }
+        });
+
+        // Mostrar u ocultar mensaje "No hay resultados"
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        noResultsMessage.style.display = found ? 'none' : 'block';
+    }
+</script>
+
 </body>
 </html>

@@ -40,7 +40,7 @@
 
         <!-- Barra de búsqueda -->
         <div class="relative mb-4">
-            <input id="searchInput" placeholder="Buscar por cédula, nombre, apellido o correo..." type="text" class="px-4 py-2 border rounded-lg w-full" oninput="buscarProfesores()">
+            <input id="searchInput" placeholder="Buscar por cédula" type="text" class="px-4 py-2 border rounded-lg w-full" oninput="buscarProfesores()">
         </div>
 
         <!-- Tabla de profesores -->
@@ -119,5 +119,43 @@
             document.getElementById("confirmModal").classList.add("hidden");
         }
     </script>
+    <script>
+    function buscarProfesores() {
+        const busqueda = document.getElementById('searchInput').value.trim(); // Obtener valor de búsqueda
+        const tableBody = document.getElementById('tableBody');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        // Realizar búsqueda en la tabla
+        let found = false;
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const cedula = row.querySelector('.identification-number').textContent.trim(); // Cédula
+            const nombre = row.querySelectorAll('td')[1].textContent.trim().toLowerCase(); // Nombre
+            const apellido = row.querySelectorAll('td')[2].textContent.trim().toLowerCase(); // Apellido
+            const correo = row.querySelectorAll('td')[4].textContent.trim().toLowerCase(); // Correo
+
+            // Verificar si coincide la búsqueda
+            if (
+                cedula.includes(busqueda) ||
+                nombre.includes(busqueda.toLowerCase()) ||
+                apellido.includes(busqueda.toLowerCase()) ||
+                correo.includes(busqueda.toLowerCase())
+            ) {
+                row.style.display = ''; // Mostrar fila
+                found = true;
+            } else {
+                row.style.display = 'none'; // Ocultar fila
+            }
+        });
+
+        // Mostrar mensaje si no se encontraron resultados
+        if (found) {
+            noResultsMessage.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'block';
+        }
+    }
+</script>
+    
 </body>
 </html>

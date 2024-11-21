@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ver Credenciales</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/General.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="/img/icon.png">
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto py-8">
+        <!-- Contenedor del Logo y Botón de Go Back -->
+        <div class="flex items-center mb-6 h-24">
+            <div class="mr-auto">
+                <img src="/img/Logo.png" alt="Logo" class="h-24 w-auto">
+            </div>
+            <div class="go-back-container">
+                <a th:href="@{/logout}" class="go-back-button flex items-center">
+                    <div class="button-hover mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
+                            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
+                            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="#000"></path>
+                        </svg>
+                    </div>
+                    <p class="text-blue-700 font-semibold">Go Back</p>
+                </a>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold text-center text-blue-700 mb-8">Credenciales de Usuario</h2>
+
+        <!-- Tabla de Credenciales -->
+        <div class="overflow-x-auto bg-white rounded-lg shadow-md border-t-4 border-blue-500">
+            <table class="table-auto w-full text-lg">
+                <thead>
+                    <tr class="bg-green-100 text-black uppercase leading-normal">
+                        <th class="py-4 px-6 text-center">Rol</th>
+                        <th class="py-4 px-6 text-center">Correo</th>
+                        <th class="py-4 px-6 text-center">Cédula</th>
+                    </tr>
+                </thead>
+                <tbody class="text-black font-medium">
+    <!-- Credenciales de Administrador -->
+    <tr class="hover:bg-green-50" th:if="${admin != null}">
+        <td class="py-4 px-6 text-center">Administrador</td>
+        <td class="py-4 px-6 text-center" th:text="${admin.email}"></td>
+        <td class="py-4 px-6 text-center" th:text="${admin.identificationNumber}"></td>
+    </tr>
+    <tr th:if="${admin == null}">
+        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de administrador disponibles.</td>
+    </tr>
+    <!-- Credenciales de Profesor -->
+    <tr class="hover:bg-green-50" th:if="${professor != null}">
+        <td class="py-4 px-6 text-center">Profesor</td>
+        <td class="py-4 px-6 text-center" th:text="${professor.email}"></td>
+        <td class="py-4 px-6 text-center" th:text="${professor.identificationNumber}"></td>
+    </tr>
+    <tr th:if="${professor == null}">
+        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de profesor disponibles.</td>
+    </tr>
+    <!-- Credenciales de Alumno -->
+    <tr class="hover:bg-green-50" th:if="${student != null}">
+        <td class="py-4 px-6 text-center">Alumno</td>
+        <td class="py-4 px-6 text-center" th:text="${student.email}"></td>
+        <td class="py-4 px-6 text-center" th:text="${student.identificationNumber}"></td>
+    </tr>
+    <tr th:if="${student == null}">
+        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de alumno disponibles.</td>
+    </tr>
+</tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
