@@ -18,6 +18,11 @@
         <!-- Título de Inicio de Sesión -->
         <h2 class="text-3xl font-semibold text-center text-blue-700 mb-6">Inicio de Sesión</h2>
         
+        <!-- Contenedor del mensaje de error -->
+        <div th:if="${error}" class="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
+            <p th:text="${error}"></p>
+        </div>
+        
         <!-- Formulario de Inicio de Sesión -->
         <form th:action="@{/login}" method="post" class="space-y-4">
             <!-- Campo de Correo Electrónico -->
@@ -36,11 +41,6 @@
             <button type="submit" class="w-full py-3 bg-gradient-to-r from-green-400 to-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105">
                 Iniciar Sesión
             </button>
-            
-            <!-- Mensaje de Error -->
-            <div th:if="${error}" class="mt-4">
-                <p class="text-center text-red-600 font-medium" th:text="${error}"></p>
-            </div>
         </form>
         
         <!-- Botón de Salir -->
@@ -49,8 +49,7 @@
                 Salir
             </a>
         </div>
-
-     
     </div>
 </body>
+
 </html>

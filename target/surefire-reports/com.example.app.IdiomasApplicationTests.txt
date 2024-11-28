@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.app.IdiomasApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.491 s -- in com.example.app.IdiomasApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.461 s -- in com.example.app.IdiomasApplicationTests

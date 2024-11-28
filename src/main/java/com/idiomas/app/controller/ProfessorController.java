@@ -76,10 +76,20 @@ public class ProfessorController {
 
     // Método POST para procesar el formulario y crear el profesor
     @PostMapping("/new")
-    public RedirectView createProfessor(@ModelAttribute Professor professor) {
-        professorRepository.save(professor); // Guarda el nuevo profesor en la base de datos
-        return new RedirectView("/professors/listar"); // Redirige a la lista de profesores
+    public RedirectView createProfessor(@ModelAttribute Professor professor, RedirectAttributes redirectAttributes) {
+        // Verificar si ya existe un profesor con el mismo número de identificación
+        if (professorRepository.existsByIdentificationNumber(professor.getIdentificationNumber())) {
+            // Agregar un mensaje de error para mostrar en la vista
+            redirectAttributes.addFlashAttribute("errorMessage", "El número de identificación ya está registrado.");
+            return new RedirectView("/professors/"); // Redirigir al formulario de creación
+        }
+
+        // Si no existe, guardar el profesor
+        professorRepository.save(professor);
+        redirectAttributes.addFlashAttribute("successMessage", "Profesor creado exitosamente.");
+        return new RedirectView("/professors/listar"); // Redirigir a la lista de profesores
     }
+
     @GetMapping("/{id}")
     public ModelAndView showProfessorDetails(@PathVariable String id) {
         ModelAndView modelAndView = new ModelAndView("DetallesProfesor");

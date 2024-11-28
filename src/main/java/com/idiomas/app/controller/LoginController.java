@@ -58,7 +58,7 @@ public class LoginController {
         // Validación de campos vacíos
         if (email == null || identificationNumber == null || email.isEmpty() || identificationNumber.isEmpty()) {
             model.addAttribute("error", "Por favor, ingresa un correo y un número de identificación.");
-            return "index";
+            return "login"; // Redirige al login con el mensaje de error
         }
 
         email = email.toLowerCase();
@@ -91,8 +91,8 @@ public class LoginController {
         }
 
         // Si no encuentra ninguna coincidencia
-        model.addAttribute("error", "Credenciales inválidas.");
-        return "index";
+        model.addAttribute("error", "Credenciales inválidas. Verifica tu correo y cédula.");
+        return "login"; // Redirige al login con el mensaje de error
     }
 
 

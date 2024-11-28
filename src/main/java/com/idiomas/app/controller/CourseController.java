@@ -14,9 +14,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.function.Function;
@@ -39,29 +40,42 @@ public class CourseController {
     public CourseController(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }
-    
     @GetMapping("/Link")
     public ModelAndView showCoursesPage() {
         ModelAndView modelAndView = new ModelAndView("ListadeCursos");
 
         // Obtener todos los cursos
         List<Course> courses = courseRepository.findAll();
-        modelAndView.addObject("courses", courses);
+        if (courses == null || courses.isEmpty()) {
+            modelAndView.addObject("courses", new ArrayList<>()); // Lista vacía si no hay cursos
+            modelAndView.addObject("professorsMap", new HashMap<>()); // Mapa vacío si no hay profesores
+            return modelAndView;
+        }
 
-        // Crear el mapa de profesores con los IDs de cursos
-        Map<String, Professor> professorsMap = courses.stream()
-                .filter(course -> course.getProfessorId() != null)
+        // Crear el mapa de profesores permitiendo nulos
+        Map<String, String> professorsMap = courses.stream()
+                .filter(course -> course.getId() != null) // Validar que el ID del curso no sea nulo
                 .collect(Collectors.toMap(
-                        Course::getId,
-                        course -> professorRepository.findById(course.getProfessorId()).orElse(null)
+                    Course::getId, // Clave: ID del curso
+                    course -> {
+                        if (course.getProfessorId() != null) {
+                            // Si hay un ID de profesor, buscar el profesor
+                            return professorRepository.findById(course.getProfessorId())
+                                    .map(professor -> professor.getFirstName() + " " + professor.getLastName())
+                                    .orElse("No asignado");
+                        }
+                        // Si no hay profesor, devolver "No asignado"
+                        return "No asignado";
+                    }
                 ));
 
+        // Agregar datos al modelo
+        modelAndView.addObject("courses", courses);
         modelAndView.addObject("professorsMap", professorsMap);
 
         return modelAndView;
     }
-    
-    
+
  
 
 
@@ -102,14 +116,15 @@ public class CourseController {
 
     @PostMapping("/new")
     public RedirectView createCourse(@ModelAttribute Course course, @RequestParam("professorId") String professorId) {
+        // Buscar el profesor por ID
         Professor professor = professorRepository.findById(professorId).orElse(null);
-        
+
         if (professor != null) {
-            // Asigna el ID del profesor al curso y guarda el curso
+            // Si el profesor existe, asignar el ID al curso
             course.setProfessorId(professorId);
             courseRepository.save(course);
 
-            // Agrega el ID del curso al profesor solo si no existe ya en la lista
+            // Agregar el ID del curso al profesor si no está ya en la lista
             List<String> courseIds = professor.getCourseIds();
             if (courseIds == null) {
                 courseIds = new ArrayList<>();
@@ -119,10 +134,14 @@ public class CourseController {
             }
             professor.setCourseIds(courseIds);
 
-            // Guarda los cambios en el profesor
+            // Guardar los cambios en el profesor
             professorRepository.save(professor);
+        } else {
+            // Si no hay profesor, registrar el curso con "No asignado"
+            course.setProfessorId(null); // Sin profesor asignado
+            courseRepository.save(course);
         }
-        
+
         return new RedirectView("/course/listar");
     }
 

@@ -11,6 +11,7 @@ import com.idiomas.app.entity.Professor;
 @Repository
 public interface ProfessorRepository extends MongoRepository<Professor, String> {
 	
+	 boolean existsByIdentificationNumber(String identificationNumber); 
 	 
 	Professor findByEmailAndIdentificationNumber(String email, String identificationNumber);
     
