@@ -78,6 +78,7 @@
             <version>5.2.2</version> <!-- Última versión de XMLBeans -->
         </dependency>
 
+
         <!-- Commons Collections (para trabajar con estructuras de datos avanzadas) -->
         <dependency>
             <groupId>org.apache.commons</groupId>

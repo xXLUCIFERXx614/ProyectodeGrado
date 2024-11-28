@@ -16,9 +16,10 @@ import com.idiomas.app.entity.Student;
 
 
 public interface StudentRepository extends MongoRepository<Student, String> {
-	 Student findByIdentificationNumberAndEmail(String identificationNumber, String email);
+	
 	 
-
+  Student findByIdentificationNumberAndEmail(String identificationNumber, String email);
+	 
 
 	    /**
 	     * Busca una lista de estudiantes que están asociados a un curso específico usando la entidad `Course`.

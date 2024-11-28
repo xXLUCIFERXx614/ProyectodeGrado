@@ -16,7 +16,7 @@
                 <img src="/img/Logo.png" alt="Logo" class="h-24 w-auto">
             </div>
             <div class="go-back-container">
-                <a th:href="@{/logout}" class="go-back-button flex items-center">
+                <a th:href="@{/professors/details/{professorId}(professorId=${professor.id})}" class="go-back-button flex items-center">
                     <div class="button-hover mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
                             <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>

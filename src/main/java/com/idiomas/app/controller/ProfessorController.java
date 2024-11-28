@@ -31,6 +31,34 @@ public class ProfessorController {
     @Autowired
     private StudentRepository studentRepository;
 
+    
+    @GetMapping("/details/{professorId}")
+    public ModelAndView viewProfessorDetails(@PathVariable String professorId) {
+        // Crear ModelAndView para el detalle del profesor
+        ModelAndView modelAndView = new ModelAndView();
+
+        try {
+            // Buscar el profesor por su ID
+            Professor professor = professorRepository.findById(professorId)
+                    .orElseThrow(() -> new RuntimeException("Profesor no encontrado con el ID: " + professorId));
+
+            // Obtener la lista de cursos asociados
+            List<Course> courses = courseRepository.findByProfessorId(professorId);
+
+            // Configurar la vista y los datos
+            modelAndView.setViewName("Professor");
+            modelAndView.addObject("professor", professor);
+            modelAndView.addObject("courses", courses);
+        } catch (RuntimeException e) {
+            // Manejar error y redirigir a una vista de error
+            modelAndView.setViewName("error/ProfesorNoEncontrado");
+            modelAndView.addObject("errorMessage", e.getMessage());
+        }
+
+        return modelAndView;
+    }
+
+
     // Método para obtener todos los cursos y redirigir a la vista ListaCursos.html
     @GetMapping("/listar")
     public ModelAndView getAllProfessors() {
@@ -81,21 +109,33 @@ public class ProfessorController {
         Optional<Course> optionalCourse = courseRepository.findById(courseId);
         if (!optionalCourse.isPresent()) {
             modelAndView.addObject("message", "Curso no encontrado.");
+            modelAndView.setViewName("error/CursoNoEncontrado"); // Vista personalizada para errores
             return modelAndView;
         }
-        
+
         Course course = optionalCourse.get();
+
+        // Buscar el profesor asociado al curso
+        Optional<Professor> optionalProfessor = professorRepository.findById(course.getProfessorId());
+        if (!optionalProfessor.isPresent()) {
+            modelAndView.addObject("message", "Profesor asociado al curso no encontrado.");
+            modelAndView.setViewName("error/ProfesorNoEncontrado"); // Vista personalizada para errores
+            return modelAndView;
+        }
+
+        Professor professor = optionalProfessor.get();
 
         // Obtener la lista de estudiantes inscritos en el curso
         List<Student> students = studentRepository.findByCourseEnrollments_CourseId(courseId);
 
-        // Agregar datos del curso y lista de estudiantes al modelo
+        // Agregar datos al modelo
         modelAndView.addObject("course", course);
+        modelAndView.addObject("professor", professor);
         modelAndView.addObject("students", students);
 
         return modelAndView;
     }
-    
+
     
     
  // Método para actualizar la nota definitiva de un estudiante en un curso

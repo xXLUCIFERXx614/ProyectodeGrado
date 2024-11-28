@@ -41,35 +41,42 @@
                     </tr>
                 </thead>
                 <tbody class="text-black font-medium">
-    <!-- Credenciales de Administrador -->
-    <tr class="hover:bg-green-50" th:if="${admin != null}">
-        <td class="py-4 px-6 text-center">Administrador</td>
-        <td class="py-4 px-6 text-center" th:text="${admin.email}"></td>
-        <td class="py-4 px-6 text-center" th:text="${admin.identificationNumber}"></td>
-    </tr>
-    <tr th:if="${admin == null}">
-        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de administrador disponibles.</td>
-    </tr>
-    <!-- Credenciales de Profesor -->
-    <tr class="hover:bg-green-50" th:if="${professor != null}">
-        <td class="py-4 px-6 text-center">Profesor</td>
-        <td class="py-4 px-6 text-center" th:text="${professor.email}"></td>
-        <td class="py-4 px-6 text-center" th:text="${professor.identificationNumber}"></td>
-    </tr>
-    <tr th:if="${professor == null}">
-        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de profesor disponibles.</td>
-    </tr>
-    <!-- Credenciales de Alumno -->
-    <tr class="hover:bg-green-50" th:if="${student != null}">
-        <td class="py-4 px-6 text-center">Alumno</td>
-        <td class="py-4 px-6 text-center" th:text="${student.email}"></td>
-        <td class="py-4 px-6 text-center" th:text="${student.identificationNumber}"></td>
-    </tr>
-    <tr th:if="${student == null}">
-        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de alumno disponibles.</td>
-    </tr>
-</tbody>
+                    <!-- Credenciales de Administrador -->
+                    <tr class="hover:bg-green-50" th:if="${admin != null}">
+                        <td class="py-4 px-6 text-center">Administrador</td>
+                        <td class="py-4 px-6 text-center" th:text="${admin.email}"></td>
+                        <td class="py-4 px-6 text-center" th:text="${admin.identificationNumber}"></td>
+                    </tr>
+                    <tr th:if="${admin == null}">
+                        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de administrador disponibles.</td>
+                    </tr>
+                    <!-- Credenciales de Profesor -->
+                    <tr class="hover:bg-green-50" th:if="${professor != null}">
+                        <td class="py-4 px-6 text-center">Profesor</td>
+                        <td class="py-4 px-6 text-center" th:text="${professor.email}"></td>
+                        <td class="py-4 px-6 text-center" th:text="${professor.identificationNumber}"></td>
+                    </tr>
+                    <tr th:if="${professor == null}">
+                        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de profesor disponibles.</td>
+                    </tr>
+                    <!-- Credenciales de Alumno -->
+                    <tr class="hover:bg-green-50" th:if="${student != null}">
+                        <td class="py-4 px-6 text-center">Alumno</td>
+                        <td class="py-4 px-6 text-center" th:text="${student.email}"></td>
+                        <td class="py-4 px-6 text-center" th:text="${student.identificationNumber}"></td>
+                    </tr>
+                    <tr th:if="${student == null}">
+                        <td colspan="3" class="py-4 px-6 text-center text-gray-500">No hay credenciales de alumno disponibles.</td>
+                    </tr>
+                </tbody>
             </table>
+        </div>
+
+        <!-- Sección de Desarrolladores -->
+        <div class="mt-12 p-6 bg-white rounded-lg shadow-md text-center border-t-4 border-green-500">
+            <h3 class="text-2xl font-bold text-green-700 mb-4">Desarrolladores</h3>
+            <p class="text-lg text-gray-700 font-medium">Andrey Libardo Hernández Martínez</p>
+            <p class="text-lg text-gray-700 font-medium">Carlos Santiago Quiroga Calderón</p>
         </div>
     </div>
 </body>

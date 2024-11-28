@@ -83,17 +83,26 @@ public class StudentController {
                 }
                 String identificationNumber = identificationCell != null ? identificationCell.getStringCellValue() : "";
 
-                // Buscar o crear el estudiante
+                // Verificar si existe un correo en el Excel
+                String email = getCellValueAsString(row.getCell(3)); // Asume que la columna 3 es para correos
+                if (email.isEmpty()) {
+                    email = generateEmail(firstName, lastName); // Genera el correo si no existe
+                }
+
+                // Buscar al estudiante por número de identificación
                 Optional<Student> studentOptional = studentRepository.findByIdentificationNumber(identificationNumber);
-                Student student = studentOptional.orElseGet(() -> {
-                    Student newStudent = new Student();
-                    newStudent.setFirstName(firstName);
-                    newStudent.setLastName(lastName);
-                    newStudent.setIdentificationNumber(identificationNumber);
-                    newStudent.setEmail(generateEmail(firstName, lastName));
-                    newStudent.setProgram(getCellValueAsString(row.getCell(5)));
-                    return newStudent;
-                });
+
+                Student student;
+                if (studentOptional.isPresent()) {
+                    student = studentOptional.get();
+                } else {
+                    student = new Student();
+                    student.setFirstName(firstName);
+                    student.setLastName(lastName);
+                    student.setIdentificationNumber(identificationNumber);
+                    student.setEmail(email); // Asigna el correo leído o generado
+                    student.setProgram(getCellValueAsString(row.getCell(5)));
+                }
 
                 // Agregar detalles específicos del curso
                 String finalGrade = getCellValueAsString(row.getCell(4));
@@ -197,131 +206,126 @@ public class StudentController {
 
 
     @PostMapping("/guardar")
-    public ModelAndView saveStudent(@ModelAttribute("student") Student student, 
+    public ModelAndView saveStudent(@ModelAttribute("student") Student student,
                                     @RequestParam("courseId") String courseId,
                                     ModelAndView mav) {
-        Optional<Student> existingStudent = studentRepository.findById(student.getId());
+        // Verifica si el ID es nulo o vacío
+        if (student.getId() == null || student.getId().isEmpty()) {
+            student.setId(null); // Asegúrate de que MongoDB genere un nuevo ID
+        }
 
-        if (existingStudent.isPresent()) {
-            Student updatedStudent = existingStudent.get();
+        Optional<Student> existingStudentOpt = student.getId() != null 
+            ? studentRepository.findById(student.getId()) 
+            : Optional.empty();
 
-            // Actualiza los datos básicos del estudiante
-            updatedStudent.setFirstName(student.getFirstName());
-            updatedStudent.setLastName(student.getLastName());
-            updatedStudent.setIdentificationNumber(student.getIdentificationNumber());
-            updatedStudent.setEmail(student.getEmail());
-            updatedStudent.setProgram(student.getProgram());
+        if (existingStudentOpt.isPresent()) {
+            Student existingStudent = existingStudentOpt.get();
 
-            // Busca el curso en la lista de inscripciones y actualiza si existe
-            CourseEnrollment enrollment = updatedStudent.getCourseEnrollments().stream()
-                .filter(enroll -> enroll.getCourseId().equals(courseId))
+            // Actualizar datos básicos del estudiante
+            existingStudent.setFirstName(student.getFirstName());
+            existingStudent.setLastName(student.getLastName());
+            existingStudent.setIdentificationNumber(student.getIdentificationNumber());
+            existingStudent.setEmail(student.getEmail());
+            existingStudent.setProgram(student.getProgram());
+
+            // Manejar la inscripción al curso
+            CourseEnrollment enrollment = existingStudent.getCourseEnrollments().stream()
+                .filter(e -> e.getCourseId().equals(courseId))
                 .findFirst()
                 .orElse(null);
 
-            if (enrollment != null) {
-                // Actualiza los datos de la inscripción existente
-                enrollment.setCourseName(student.getCourseEnrollments().get(0).getCourseName());
-                enrollment.setEnglishLevel(student.getCourseEnrollments().get(0).getEnglishLevel());
-                enrollment.setFinalGrade(student.getCourseEnrollments().get(0).getFinalGrade());
-                
-                // Actualiza el estado en función de la nota final
-                String finalGrade = student.getCourseEnrollments().get(0).getFinalGrade();
-                if ("NP".equalsIgnoreCase(finalGrade)) {
-                    enrollment.setStatus("No Aprobado");
-                } else {
-                    try {
-                        double grade = Double.parseDouble(finalGrade);
-                        enrollment.setStatus(grade >= 3.0 ? "Aprobado" : "No Aprobado");
-                    } catch (NumberFormatException e) {
-                        enrollment.setStatus("No Aprobado"); // Valor por defecto si la nota no es válida
-                    }
-                }
+            if (enrollment == null) {
+                enrollment = createNewCourseEnrollment(student, courseId);
+                existingStudent.getCourseEnrollments().add(enrollment);
             } else {
-                // Si no existe, crea una nueva inscripción para el curso
-                CourseEnrollment newEnrollment = new CourseEnrollment(
-                    courseId, 
-                    student.getCourseEnrollments().get(0).getCourseName(), 
-                    student.getCourseEnrollments().get(0).getEnglishLevel(), 
-                    student.getCourseEnrollments().get(0).getFinalGrade()
-                );
-
-                // Determina el estado inicial del nuevo curso basado en la nota
-                String finalGrade = student.getCourseEnrollments().get(0).getFinalGrade();
-                if ("NP".equalsIgnoreCase(finalGrade)) {
-                    newEnrollment.setStatus("No Aprobado");
-                } else {
-                    try {
-                        double grade = Double.parseDouble(finalGrade);
-                        newEnrollment.setStatus(grade >= 3.0 ? "Aprobado" : "No Aprobado");
-                    } catch (NumberFormatException e) {
-                        newEnrollment.setStatus("No Aprobado");
-                    }
-                }
-
-                updatedStudent.getCourseEnrollments().add(newEnrollment);
+                updateCourseEnrollment(enrollment, student);
             }
 
-            studentRepository.save(updatedStudent); // Guarda los cambios en el estudiante existente
+            studentRepository.save(existingStudent);
         } else {
-            // Si es un nuevo estudiante, agrega directamente el curso de inscripción
-            CourseEnrollment newEnrollment = new CourseEnrollment(
-                courseId, 
-                student.getCourseEnrollments().get(0).getCourseName(), 
-                student.getCourseEnrollments().get(0).getEnglishLevel(), 
-                student.getCourseEnrollments().get(0).getFinalGrade()
-            );
-
-            // Determina el estado inicial del nuevo curso basado en la nota
-            String finalGrade = student.getCourseEnrollments().get(0).getFinalGrade();
-            if ("NP".equalsIgnoreCase(finalGrade)) {
-                newEnrollment.setStatus("No Aprobado");
-            } else {
-                try {
-                    double grade = Double.parseDouble(finalGrade);
-                    newEnrollment.setStatus(grade >= 3.0 ? "Aprobado" : "No Aprobado");
-                } catch (NumberFormatException e) {
-                    newEnrollment.setStatus("No Aprobado");
-                }
-            }
-
-            student.getCourseEnrollments().add(newEnrollment);
-            studentRepository.save(student); // Guarda el nuevo estudiante con la inscripción
+            // Crear un nuevo estudiante
+            CourseEnrollment enrollment = createNewCourseEnrollment(student, courseId);
+            student.getCourseEnrollments().clear();
+            student.getCourseEnrollments().add(enrollment);
+            studentRepository.save(student);
         }
 
-        mav.setViewName("redirect:/course/" + courseId); // Redirige de regreso a la lista de estudiantes del curso
+        mav.setViewName("redirect:/course/" + courseId);
         return mav;
     }
 
+    // Método para crear una nueva inscripción
+    private CourseEnrollment createNewCourseEnrollment(Student student, String courseId) {
+        // Obtener el curso para completar los datos de inscripción
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado con ID: " + courseId));
+
+        CourseEnrollment enrollment = new CourseEnrollment();
+        enrollment.setCourseId(courseId);
+        enrollment.setCourseName(course.getCourseName());
+        enrollment.setEnglishLevel(course.getEnglishLevel());
+        enrollment.setFinalGrade(student.getCourseEnrollments().get(0).getFinalGrade());
+
+        // Calcular el estado
+        updateEnrollmentStatus(enrollment);
+
+        return enrollment;
+    }
+
+    // Método para actualizar los datos de una inscripción existente
+    private void updateCourseEnrollment(CourseEnrollment enrollment, Student student) {
+        enrollment.setFinalGrade(student.getCourseEnrollments().get(0).getFinalGrade());
+        updateEnrollmentStatus(enrollment);
+    }
+
+    // Método para calcular el estado en función de la nota final
+    private void updateEnrollmentStatus(CourseEnrollment enrollment) {
+        String finalGrade = enrollment.getFinalGrade();
+        if ("NP".equalsIgnoreCase(finalGrade)) {
+            enrollment.setStatus("No Aprobado");
+        } else {
+            try {
+                double grade = Double.parseDouble(finalGrade);
+                enrollment.setStatus(grade >= 3.0 ? "Aprobado" : "No Aprobado");
+            } catch (NumberFormatException e) {
+                enrollment.setStatus("No Aprobado"); // Valor por defecto si la nota no es válida
+            }
+        }
+    }
 
     @GetMapping("/edit/{id}")
-    public ModelAndView showEditForm(@PathVariable("id") String studentId, @RequestParam("courseId") String courseId) {
+    public ModelAndView showEditForm(@PathVariable("id") String studentId, 
+                                     @RequestParam("courseId") String courseId) {
         ModelAndView mav = new ModelAndView("CrearStudent"); // Nombre de la vista
-        Optional<Student> studentOpt = studentRepository.findById(studentId);
 
+        Optional<Student> studentOpt = studentRepository.findById(studentId);
         if (studentOpt.isPresent()) {
-            mav.addObject("student", studentOpt.get()); // Pasa el estudiante a la vista
-            mav.addObject("courseId", courseId); // Agrega el courseId al modelo
-            
-            // Busca el curso por ID y pasa sus datos al modelo
-            Optional<Course> courseOpt = courseRepository.findById(courseId);
-            if (courseOpt.isPresent()) {
-                Course course = courseOpt.get();
-                mav.addObject("courseName", course.getCourseName());
-                mav.addObject("englishLevel", course.getEnglishLevel());
-                mav.addObject("status", course.getStatus());
-            }
+            Student student = studentOpt.get();
+            mav.addObject("student", student); // Pasa el estudiante a la vista
         } else {
-            mav.setViewName("redirect:/students"); // Redirige a la lista si no se encuentra el estudiante
+            // Si el estudiante no existe, creamos un nuevo objeto vacío
+            Student newStudent = new Student();
+            mav.addObject("student", newStudent); // Pasa el nuevo estudiante a la vista
+        }
+
+        mav.addObject("courseId", courseId); // Agrega el courseId al modelo
+
+        // Busca el curso por ID y pasa sus datos al modelo
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
+            mav.addObject("courseName", course.getCourseName());
+            mav.addObject("englishLevel", course.getEnglishLevel());
         }
 
         return mav;
     }
-    
+
     
     @GetMapping("/create/{courseId}")
     public ModelAndView showCreateStudentForm(@PathVariable String courseId) {
         ModelAndView mav = new ModelAndView("CrearStudent"); // Nombre de la vista de creación/edición
-        Student newStudent = new Student(); // Crear un nuevo objeto Student
+        Student newStudent = new Student(); // Crear un nuevo objeto Student (sin ID)
         mav.addObject("student", newStudent);
         mav.addObject("courseId", courseId); // Pasa el ID del curso al modelo para el formulario
 
@@ -352,12 +356,13 @@ public class StudentController {
             studentRepository.save(student);
         }
 
-        // Redirige de regreso a la página de detalles del curso con ModelAndView
+        // Redirige de regreso a la página de detalles del curso
         ModelAndView modelAndView = new ModelAndView("redirect:/course/" + courseId);
         modelAndView.addObject("message", "El curso ha sido eliminado del estudiante.");
 
         return modelAndView;
     }
+
 
     @PostMapping("/registro/save")
     public ModelAndView saveStudentRegistration(@ModelAttribute Student student) {
