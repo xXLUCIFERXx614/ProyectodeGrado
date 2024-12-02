@@ -59,7 +59,7 @@
                     <tr class="bg-green-100 text-black  leading-normal">
                         <th class="py-2 px-4 border-b">#</th>
                         <th class="py-2 px-4 border-b">Nombre del Curso</th>
-                        <th class="py-2 px-4 border-b">Profesor</th>
+                        <th class="py-2 px-4 border-b">Docente</th>
                         <th class="py-2 px-4 border-b">Estado</th>
                         <th class="py-2 px-4 border-b">Niveles de Inglés</th>
                         <th class="py-2 px-4 border-b">Fecha Fin</th>
@@ -71,10 +71,12 @@
     <tr th:each="course, iter : ${courses}" class="hover:bg-green-50">
         <td class="py-2 px-4 text-center" th:text="${iter.index + 1}"></td>
         <td class="py-2 px-4 text-center" th:text="${course.courseName ?: 'Sin nombre'}"></td>
-        <td class="py-2 px-4 text-center" 
-            th:text="${professorsMap[course.id] != null ? professorsMap[course.id] : 'No asignado'}">
-
-
+        <td class="py-2 px-4 text-center" >
+             <!-- Verificar si el mapa y la clave son válidos -->
+                <span th:text="${professorNamesMap != null && professorNamesMap.containsKey(course.id) 
+                    ? professorNamesMap[course.id] : 'Profesor no asignado'}">
+                
+                </span>
         </td>
         <td class="py-2 px-4 text-center" th:text="${course.status ?: 'Desconocido'}"></td>
         <td class="py-2 px-4 text-center" th:text="${course.englishLevel ?: 'No definido'}"></td>

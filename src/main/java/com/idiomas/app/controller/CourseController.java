@@ -85,19 +85,29 @@ public class CourseController {
         List<Course> courses = courseRepository.findAll();
         List<Professor> professors = professorRepository.findAll();
 
-        // Crear el mapa de course.id -> Professor
-        Map<String, Professor> professorsMap = professors.stream()
-            .filter(professor -> professor.getCourseIds() != null)
-            .flatMap(professor -> professor.getCourseIds().stream()
-                .map(courseId -> Map.entry(courseId, professor)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // Crear un mapa de course.id -> Nombre completo del profesor
+        Map<String, String> professorNamesMap = new HashMap<>();
+        for (Course course : courses) {
+            String professorName = "No asignado";
+            if (course.getProfessorId() != null) {
+                Professor professor = professors.stream()
+                        .filter(p -> p.getId().equals(course.getProfessorId()))
+                        .findFirst()
+                        .orElse(null);
+                if (professor != null) {
+                    professorName = professor.getFirstName() + " " + professor.getLastName();
+                }
+            }
+            professorNamesMap.put(course.getId(), professorName);
+        }
 
         ModelAndView modelAndView = new ModelAndView("ListadeCursos");
-        modelAndView.addObject("courses", courses);
-        modelAndView.addObject("professorsMap", professorsMap); // Agregar el mapa al modelo
+        modelAndView.addObject("courses", courses); // Lista de cursos
+        modelAndView.addObject("professorNamesMap", professorNamesMap); // Mapa de nombres de profesores (siempre inicializado)
 
         return modelAndView;
     }
+
 
     @GetMapping("/")
     public ModelAndView showCreateCourseForm() {
@@ -113,37 +123,36 @@ public class CourseController {
         return modelAndView;
     }
 
-
     @PostMapping("/new")
-    public RedirectView createCourse(@ModelAttribute Course course, @RequestParam("professorId") String professorId) {
-        // Buscar el profesor por ID
-        Professor professor = professorRepository.findById(professorId).orElse(null);
+    public RedirectView createCourse(@ModelAttribute Course course, @RequestParam(name = "professorId", required = false) String professorId) {
+        System.out.println("Valor recibido de professorId: '" + professorId + "'");
 
-        if (professor != null) {
-            // Si el profesor existe, asignar el ID al curso
-            course.setProfessorId(professorId);
-            courseRepository.save(course);
-
-            // Agregar el ID del curso al profesor si no está ya en la lista
-            List<String> courseIds = professor.getCourseIds();
-            if (courseIds == null) {
-                courseIds = new ArrayList<>();
-            }
-            if (!courseIds.contains(course.getId())) {
-                courseIds.add(course.getId());
-            }
-            professor.setCourseIds(courseIds);
-
-            // Guardar los cambios en el profesor
-            professorRepository.save(professor);
+        if (professorId == null || professorId.trim().isEmpty()) {
+            course.setProfessorId(null);
         } else {
-            // Si no hay profesor, registrar el curso con "No asignado"
-            course.setProfessorId(null); // Sin profesor asignado
-            courseRepository.save(course);
+            course.setProfessorId(professorId);
+
+            // Agregar lógica para vincular el curso al profesor si es necesario
+            Professor professor = professorRepository.findById(professorId).orElse(null);
+            if (professor != null) {
+                List<String> courseIds = professor.getCourseIds();
+                if (courseIds == null) {
+                    courseIds = new ArrayList<>();
+                }
+                if (!courseIds.contains(course.getId())) {
+                    courseIds.add(course.getId());
+                }
+                professor.setCourseIds(courseIds);
+                professorRepository.save(professor);
+            }
         }
+
+        // Guarda el curso
+        courseRepository.save(course);
 
         return new RedirectView("/course/listar");
     }
+
 
 
     
@@ -220,25 +229,37 @@ public class CourseController {
         // Buscar el curso que se va a eliminar
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + id));
-        
+
         // Buscar todos los estudiantes que tienen este curso en sus inscripciones
         List<Student> studentsWithCourse = studentRepository.findByCourseEnrollments_CourseId(id);
-        
+
         // Recorrer cada estudiante y eliminar la referencia del curso en sus inscripciones
         for (Student student : studentsWithCourse) {
             // Filtrar las inscripciones para quitar el curso que se está eliminando
             student.getCourseEnrollments().removeIf(enrollment -> enrollment.getCourseId().equals(id));
-            
             // Guardar el estudiante actualizado en el repositorio
             studentRepository.save(student);
         }
-        
+
+        // Verificar si el curso tiene un profesor asignado
+        if (course.getProfessorId() != null && !course.getProfessorId().isEmpty()) {
+            // Buscar el profesor asignado al curso
+            Professor professor = professorRepository.findById(course.getProfessorId()).orElse(null);
+            if (professor != null) {
+                // Remover el curso de la lista de cursos del profesor
+                professor.getCourseIds().remove(id);
+                // Guardar los cambios en el profesor
+                professorRepository.save(professor);
+            }
+        }
+
         // Eliminar el curso
         courseRepository.delete(course);
-        
+
         // Redirigir a la lista de cursos
         return new RedirectView("/course/listar");
     }
+
 
     
     
@@ -246,28 +267,27 @@ public class CourseController {
     public ModelAndView showCourseDetails(@PathVariable String courseId) {
         ModelAndView modelAndView = new ModelAndView("DetallesCursos");
 
-        // Obtén el curso si existe
-        Optional<Course> optionalCourse = courseRepository.findById(courseId);
-        if (!optionalCourse.isPresent()) {
-            modelAndView.addObject("message", "Curso no encontrado.");
-            return modelAndView;
+        // Buscar el curso
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + courseId));
+
+        // Verificar si el curso tiene un profesor asignado
+        Professor professor = null;
+        if (course.getProfessorId() != null && !course.getProfessorId().trim().isEmpty()) {
+            professor = professorRepository.findById(course.getProfessorId()).orElse(null);
         }
-        Course course = optionalCourse.get();
 
-        // Obtén el profesor asignado al curso
-        Optional<Professor> optionalProfessor = professorRepository.findById(course.getProfessorId());
-        Professor professor = optionalProfessor.orElse(null);
-
-        // Obtén la lista de estudiantes asociados al curso usando el nuevo método
+        // Obtener estudiantes asociados al curso
         List<Student> students = studentRepository.findByCourseEnrollments_CourseId(courseId);
-        
-        // Agrega el curso, los estudiantes y el profesor al modelo
+
+        // Agregar datos al modelo
         modelAndView.addObject("course", course);
+        modelAndView.addObject("professor", professor); // Puede ser null si no hay profesor asignado
         modelAndView.addObject("students", students);
-        modelAndView.addObject("professor", professor);
 
         return modelAndView;
     }
+
     
 }
 

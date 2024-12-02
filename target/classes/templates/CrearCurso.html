@@ -18,7 +18,7 @@
             </div>
             <!-- Botón de Go Back con enlace Thymeleaf a /course/Link -->
             <div class="go-back-container">
-                <a th:href="@{/course/Link}" class="go-back-button flex items-center">
+                <a th:href="@{/course/listar}" class="go-back-button flex items-center">
                     <div class="button-hover mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="25px" width="25px">
                             <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="#000"></path>
@@ -68,12 +68,12 @@
                 <div>
                     <label for="professorSelect" class="block text-gray-700 font-semibold mb-1">Profesor:</label>
                     <select name="professorId" id="professorSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
-                        <option value="">Profesor no asignado</option>
-                        <option th:each="professor : ${professors}"
-                                th:value="${professor.id}"
-                                th:text="${professor.firstName + ' ' + professor.lastName}"
-                                th:selected="${course.professorId == professor.id}">
-                        </option>
+                       <option value="" th:selected="${course.professorId == null || course.professorId == ''}">No asignado</option>
+    <option th:each="professor : ${professors}" 
+            th:value="${professor.id}" 
+            th:text="${professor.firstName + ' ' + professor.lastName}" 
+            th:selected="${course.professorId != null && course.professorId.equals(professor.id)}">
+    </option>
                     </select>
                 </div>
 
